@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title
+        th:text="${modoExclusao != null ? (modoExclusao ? 'Excluir Cliente' : (cliente.id != null ? 'Editar Cliente' : 'Novo Cliente')) : 'Novo Cliente'}">
+    </title>
+</head>
+
+<body>
+    <h1
+        th:text="${modoExclusao != null ? (modoExclusao ? 'Excluir Cliente' : ((cliente != null and cliente.id != null) ? 'Editar Cliente' : 'Adicionar Novo Cliente')) : 'Adicionar Novo Cliente'}">
+    </h1>
+
+    <!-- Se estiver no modo exclusão, exibe apenas os dados e botão de exclusão -->
+    <div th:if="${modoExclusao}">
+        <p>Tem certeza que deseja excluir o cliente <strong th:text="${cliente.nome}"></strong>?</p>
+
+        <ul>
+            <li><strong>Nome:</strong> <span th:text="${cliente.nome}"></span></li>
+            <li><strong>Email:</strong> <span th:text="${cliente.email}"></span></li>
+            <li><strong>Telefone:</strong> <span th:text="${cliente.telefone}"></span></li>
+            <li><strong>CPF/CNPJ:</strong> <span th:text="${cliente.cpfCnpj}"></span></li>
+        </ul>
+
+        <form th:action="@{/clientes/excluir/{id}(id=${cliente.id})}" method="post">
+            <button type="submit">Confirmar Exclusão</button>
+        </form>
+        <a th:href="@{/clientes}">
+            <button type="button">Cancelar</button>
+        </a>
+
+    </div>
+
+    <!-- Se NÃO for exclusão, exibe formulário de criação/edição -->
+    <div th:unless="${modoExclusao}">
+        <div th:if="${erro}" class="erro-msg">
+            <p style="color: red; font-weight: bold;">[[${erro}]]</p>
+        </div>
+        <form th:action="@{/clientes}" method="post" th:object="${cliente}">
+            <input type="hidden" th:field="*{id}" />
+            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                <div style="flex: 1;">
+                    <label>Nome:</label>
+                    <input type="text" th:field="*{nome}" required style="width: 100%; padding: 10px;">
+                </div>
+
+                <div style="flex: 1;">
+                    <label>Email:</label>
+                    <input type="email" th:field="*{email}" required style="width: 100%; padding: 10px;">
+                </div>
+            </div>
+
+            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                <div style="flex: 1;">
+                    <label>Telefone:</label>
+                    <input type="text" id="telefone" th:field="*{telefone}" required placeholder="Digite apenas números"
+                        style="width: 100%; font-size: 16px; padding: 10px;"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                </div>
+
+
+                <div style="flex: 1;">
+
+                    <label>CPF/CNPJ:</label>
+                    <div id="mensagemErro" style="color: red; font-weight: bold;"></div>
+                    <input type="text" th:field="*{cpfCnpj}" required placeholder="Digite apenas números"
+                        style="width: 100%; font-size: 16px; padding: 10px;" oninput="formatarCpfCnpj(this)"
+                        maxlength="18">
+                    <br>
+
+                    <script>
+                        function formatarCpfCnpj(input) {
+                            let value = input.value.replace(/\D/g, ''); // Remove tudo que não for número
+
+                            if (value.length <= 11) { // CPF: 999.999.999-99
+                                input.value = value.replace(/^(\d{3})(\d{3})(\d{3})(\d{0,2})$/, "$1.$2.$3-$4");
+                            } else if (value.length > 11) { // CNPJ: 99.999.999/0001-99
+                                input.value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2})$/, "$1.$2.$3/$4-$5");
+                            }
+
+                            // Validação para permitir apenas 11 ou 14 números
+                            if (value.length !== 11 && value.length !== 14) {
+                                input.setCustomValidity("Digite um CPF (11 dígitos) ou um CNPJ (14 dígitos).");
+                            } else {
+                                input.setCustomValidity("");
+                            }
+                        }
+                    </script>
+                </div>
+            </div>
+
+
+            <button type="submit" th:text="${cliente.id != null ? 'Atualizar Cliente' : 'Salvar Cliente'}"></button>
+            <a th:href="@{/clientes}">
+                <button type="button">Cancelar</button>
+            </a>
+
+        </form>
+    </div>
+    <script>
+        function validarCpfCnpj(input) {
+            let value = input.value.replace(/\D/g, '');
+
+            if (value.length !== 11 && value.length !== 14) {
+                document.getElementById("mensagemErro").innerText = "⚠ CPF/CNPJ inválido! Verifique e tente novamente.";
+                return false;
+            } else {
+                document.getElementById("mensagemErro").innerText = "";
+            }
+        }
+    </script>
+</body>
+</div>
+</html>

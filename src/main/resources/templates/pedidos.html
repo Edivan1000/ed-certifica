@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Pedidos</title>
+</head>
+
+<body>
+    <div th:replace="~{fragments/menu :: menu}"></div>
+
+    <div th:if="${sucesso}"
+        style="color: white; background-color: green; font-weight: bold; 
+     font-size: 16px; border: 2px solid darkgreen; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center;">
+        ✅ <p th:text="${sucesso}" style="margin: 0;"></p>
+    </div>
+
+    <h1>Lista de Pedidos</h1>
+
+    <form th:action="@{/pedidos/busca}" method="get">
+        <input type="text" name="termo" placeholder="Digite o código do pedido">
+        <button type="submit">Buscar</button>
+    </form>
+
+    <br></br>
+
+    <a th:href="@{/pedidos/novo}">
+        <button type="button">Adicionar Novo Pedido</button>
+    </a>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Cliente</th>
+                <th>Código Pedido</th> <!-- Corrigido erro no `/th` -->
+                <th>Tipo de Certificado</th>
+                <th>Data do Pedido</th>
+                <th>Status do Pedido</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:if="${pedidos.empty}">
+                <td colspan="6">Nenhum pedido cadastrado.</td>
+            </tr>
+            <tr th:each="pedido : ${pedidos}">
+                <td th:text="${pedido.cliente.nome}">Cliente</td> <!-- Corrigido para exibir o nome -->
+                <td th:text="${pedido.codigoPedido}">Código</td> <!-- Corrigido nome da variável -->
+                <td th:text="${pedido.tipoCertificado}">Tipo</td>
+                <td th:text="${pedido.dataPedido}">Data</td>
+                <td th:text="${pedido.statusPedido}">Status</td>
+                <td>
+
+                    <a th:href="@{/pedidos/editar/{id}(id=${pedido.id})}">
+                        <button type="button">Editar</button>
+                    </a>
+                    <a th:href="@{'/pedidos/excluir/' + ${pedido.id}}">
+                        <button type="button">Excluir</button>
+                    </a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+
+</html>
