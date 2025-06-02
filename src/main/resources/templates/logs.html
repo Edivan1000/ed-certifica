@@ -1,0 +1,20 @@
+<table class="striped">
+    <thead>
+        <tr>
+            <th>Ação</th>
+            <th>Entidade</th>
+            <th>ID</th>
+            <th>Usuário</th>
+            <th>Data e Hora</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="log : ${logs}">
+            <td th:text="${log.acao}"></td>
+            <td th:text="${log.entidade}"></td>
+            <td th:text="${log.entidadeId}"></td>
+            <td th:text="${log.usuario}"></td>
+            <td th:text="${#temporals.format(log.dataHora, 'dd/MM/yyyy HH:mm')}"></td>
+        </tr>
+    </tbody>
+</table>
