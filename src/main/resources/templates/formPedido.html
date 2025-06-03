@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title th:text="${modoExclusao ? 'Excluir Pedido' : (pedido.id != null ? 'Editar Pedido' : 'Novo Pedido')}"></title>
+ 
+    <!-- Importando Materialize CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+</head>
+
+<body>
+    <h1 th:text="${modoExclusao ? 'Excluir Pedido' : (pedido.id != null ? 'Editar Pedido' : 'Adicionar Novo Pedido')}">
+    </h1>
+
+    <!-- Se estiver no modo exclusão, exibe apenas os dados e botão de exclusão -->
+    <div th:if="${modoExclusao}">
+        <p style="color: red; font-weight: bold; font-size: 18px;">
+            ⚠️ Tem certeza que deseja excluir o pedido de <strong th:text="${pedido.cliente.nome}"></strong>?
+        </p>
+        <ul>
+            <li><strong>Data do Pedido:</strong> <span th:text="${pedido.dataPedido}"></span></li>
+            <li><strong>Código do Pedido:</strong> <span th:text="${pedido.codigoPedido}"></span></li>
+            <li><strong>Status:</strong> <span th:text="${pedido.statusPedido}"></span></li>
+            <li><strong>Tipo de Certificado:</strong> <span th:text="${pedido.tipoCertificado}"></span></li>
+            <li><strong>Cliente:</strong> <span th:text="${pedido.cliente.nome}"></span></li>
+        </ul>
+
+        <form th:action="@{/pedidos/excluir/{id}(id=${pedido.id})}" method="post">
+            <button type="submit">Confirmar Exclusão</button>
+        </form>
+        <a th:href="@{/pedidos}">
+            <button type="button">Cancelar</button>
+        </a>
+    </div>
+
+    <!-- Se NÃO for exclusão, exibe formulário de criação/edição -->
+    <div th:unless="${modoExclusao}">
+        <form th:action="@{/pedidos/salvar}" method="post" th:object="${pedido}">
+            <input type="hidden" name="id" th:value="${pedido.id}" />
+
+            <!--<label>Cliente:</label>-->
+            <div th:if="${pedido.id != null}"> <!-- Se estiver editando, só exibe o nome -->
+                <p><strong>Cliente:</strong> <span th:text="${pedido.cliente.nome}"></span></p>
+                <input type="hidden" th:field="*{cliente}" /> <!-- Mantém o cliente sem edição -->
+            </div>
+
+            <div th:unless="${pedido.id != null}"> <!-- Se for novo pedido, permite escolha -->
+                <label>Cliente:</label>
+                <select th:field="*{cliente}" required>
+                    <option value="">Selecione</option>
+                    <option th:each="cliente : ${clientes}" th:value="${cliente.id}" th:text="${cliente.nome}"></option>
+                </select>
+            </div>
+
+            <label>Código do Pedido:</label>
+            <input type="text" th:field="*{codigoPedido}" readonly>
+
+            <br>
+
+            <label>Data do Pedido:</label>
+            <!-- Se for edição (pedido.id != null), exibe a data fixa e permite alteração -->
+            <div th:if="${pedido.id != null}">
+                <input type="text" th:value="${pedido.dataPedido}" readonly
+                    style="border: none; background: transparent; font-weight: bold;"> <!-- Apenas visualização -->
+                <p style="font-style: italic; color: gray;">
+                    Caso necessário, altere usando o calendário abaixo:
+                </p>
+                <input type="date" th:field="*{dataPedido}" style="margin-left: 10px;"> <!-- Calendário opcional -->
+
+
+            </div>
+
+            <!-- Se for criação (pedido.id == null), apenas o calendário aparece -->
+            <div th:unless="${pedido.id != null}">
+                <input type="date" th:field="*{dataPedido}" required> <!-- Escolha obrigatória -->
+            </div>
+            <br>
+
+            <label>Status:</label>
+            <select th:field="*{statusPedido}" required>
+                <option value="" selected>Selecione um status</option> <!-- Nome introdutório -->
+                <option value="PENDENTE">Pendente</option>
+                <option value="APROVADO">Aprovado</option>
+                <option value="CANCELADO">Cancelado</option>
+            </select>
+            <br>
+
+            <label>Tipo de Certificado:</label>
+            <select th:field="*{tipoCertificado}" required>
+                <option value="" selected>Escolha o tipo de certificado</option> <!-- Nome introdutório -->
+                <option value="A1-ARQUIVO">A1 - Arquivo</option>
+                <option value="A3-TOKEN">A3 - Token</option>
+                <option value="A3-SMARTCARD">A3 - SmartCard</option>
+                <option value="A3-NUVEM">A3 - Nuvem</option>
+            </select>
+
+            <button type="submit" th:text="${pedido.id != null ? 'Atualizar Pedido' : 'Salvar Pedido'}"></button>
+            <a th:href="@{/pedidos}">
+                <button type="button">Cancelar</button>
+            </a>
+        </form>
+    </div>
+</body>
+<!-- Exibir mensagens de erro e sucesso -->
+<div th:if="${erro}" style="color: red; font-weight: bold; font-size: 16px; border: 2px solid red; padding: 10px;">
+    <p th:text="${erro}"></p>
+</div>
+
+</html>
