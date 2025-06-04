@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${modoExclusao != null ? (modoExclusao ? 'Excluir Cliente' : (cliente.id != null ? 'Editar Cliente' : 'Novo Cliente')) : 'Novo Cliente'}"></title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+
+<body class="container">
+
+    <h4 th:text="${modoExclusao != null ? (modoExclusao ? 'Excluir Cliente' : ((cliente != null and cliente.id != null) ? 'Editar Cliente' : 'Adicionar Novo Cliente')) : 'Adicionar Novo Cliente'}" class="center-align"></h4>
+
+    <div th:if="${modoExclusao}" class="card red lighten-4">
+        <div class="card-content">
+            <span class="card-title red-text text-darken-4">
+                ⚠️ Tem certeza que deseja excluir o cliente <strong th:text="${cliente.nome}"></strong>?
+            </span>
+            <ul>
+                <li><strong>Nome:</strong> <span th:text="${cliente.nome}"></span></li>
+                <li><strong>Email:</strong> <span th:text="${cliente.email}"></span></li>
+                <li><strong>Telefone:</strong> <span th:text="${cliente.telefone}"></span></li>
+                <li><strong>CPF/CNPJ:</strong> <span th:text="${cliente.cpfCnpj}"></span></li>
+            </ul>
+        </div>
+        <div class="card-action">
+            <form th:action="@{/clientes/excluir/{id}(id=${cliente.id})}" method="post" style="display: inline;">
+                <button type="submit" class="btn red">Confirmar Exclusão</button>
+            </form>
+            <a th:href="@{/clientes}" class="btn grey">Cancelar</a>
+        </div>
+    </div>
+
+    <div th:unless="${modoExclusao}" class="card">
+        <div class="card-content">
+            <div th:if="${erro}" class="card-panel red lighten-4">
+                <span class="red-text text-darken-4"><strong>[[${erro}]]</strong></span>
+            </div>
+
+            <form th:action="${cliente.id != null} ? @{/clientes/editar/{id}(id=${cliente.id})} : @{/clientes/salvar}" method="post" th:object="${cliente}">
+                <input type="hidden" th:field="*{id}" />
+
+                <div class="row">
+                    <div class="input-field col s12 m6">
+                        <input type="text" th:field="*{nome}" id="nome" class="validate" required>
+                        <label for="nome">Nome</label>
+                    </div>
+
+                    <div class="input-field col s12 m6">
+                        <input type="email" th:field="*{email}" id="email" class="validate" required>
+                        <label for="email">Email</label>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="input-field col s12 m6">
+                        <input type="text" th:field="*{telefone}" id="telefone" class="validate" required 
+                            placeholder="Digite apenas números"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                        <label for="telefone">Telefone</label>
+                    </div>
+
+                    <div class="input-field col s12 m6">
+                        <input type="text" th:field="*{cpfCnpj}" id="cpfCnpj" class="validate" required
+                            placeholder="Digite apenas números" maxlength="18"
+                            oninput="formatarCpfCnpj(this)">
+                        <label for="cpfCnpj">CPF/CNPJ</label>
+                        <span id="mensagemErro" class="red-text text-darken-2"></span>
+                    </div>
+                </div>
+
+                <div class="center-align">
+                    <button type="submit" class="btn blue" th:text="${cliente.id != null ? 'Atualizar Cliente' : 'Salvar Cliente'}"></button>
+                    <a th:href="@{/clientes}" class="btn grey">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function formatarCpfCnpj(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (value.length <= 11) {
+                input.value = value.replace(/^(\d{3})(\d{3})(\d{3})(\d{0,2})$/, "$1.$2.$3-$4");
+            } else if (value.length > 11) {
+                input.value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2})$/, "$1.$2.$3/$4-$5");
+            }
+
+            if (value.length !== 11 && value.length !== 14) {
+                input.setCustomValidity("Digite um CPF (11 dígitos) ou um CNPJ (14 dígitos).");
+                document.getElementById("mensagemErro").innerText = "⚠ CPF/CNPJ inválido!";
+            } else {
+                input.setCustomValidity("");
+                document.getElementById("mensagemErro").innerText = "";
+            }
+        }
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</body>
+
+</html>
