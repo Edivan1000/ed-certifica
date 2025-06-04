@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Clientes</title>
+
+    <!-- Importando Materialize CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <style>
+        .container {
+            margin-top: 30px;
+        }
+
+        .table-header {
+            background-color: #00897b;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Espaço para botão adicionar */
+        .add-button-container {
+            margin: 20px 0;
+            text-align: right;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div th:replace="~{fragments/menu :: menu}"></div> <!-- Navbar reaproveitada -->
+
+    <div class="container">
+        <!-- Mensagem de sucesso -->
+        <div th:if="${sucesso}" class="card-panel green white-text center-align">
+            ✅ <p th:text="${sucesso}" style="margin: 0;"></p>
+        </div>
+
+        <!-- Mensagem de erro -->
+        <div th:if="${erro}" class="card-panel red white-text center-align">
+            ⚠️ <p th:text="${erro}" style="margin: 0;"></p>
+        </div>
+
+        <h3 class="center-align">Lista de Clientes</h3>
+
+        <!-- Formulário de busca -->
+
+        <form th:action="@{/clientes/busca}" method="get" class="input-field">
+            <input type="text" name="termo" placeholder="Digite o nome do cliente">
+            <button type="submit" class="btn teal">Buscar</button>
+        </form>
+    </div>
+
+    <!-- Botão de adicionar novo cliente -->
+    <div class="add-button-container">
+        <a th:href="@{/clientes/novo}" class="btn blue">Adicionar Novo Cliente</a>
+    </div>
+
+    <!-- Tabela de Clientes -->
+    <table class="striped centered responsive-table">
+        <thead>
+            <tr class="table-header">
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Telefone</th>
+                <th>CPF/CNPJ</th>
+                <th>Ações</th>
+                <th>Pedidos Associados</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:if="${clientes.empty}">
+                <td colspan="6">Nenhum cliente cadastrado.</td>
+            </tr>
+            <tr th:each="cliente : ${clientes}">
+                <td th:text="${cliente.nome}"></td>
+                <td th:text="${cliente.email}"></td>
+                <td th:text="${cliente.telefone}"></td>
+                <td th:text="${cliente.cpfCnpj}"></td>
+                <td>
+                    <a th:href="@{/clientes/editar/{id}(id=${cliente.id})}" class="btn yellow black-text">Editar</a>
+                    <a th:href="@{/clientes/excluir/{id}(id=${cliente.id})}" class="btn red">Excluir</a>
+                </td>
+                <td>
+                    <div
+                        th:if="${pedidosPorCliente != null and pedidosPorCliente.containsKey(cliente.id) and pedidosPorCliente[cliente.id] != null and !pedidosPorCliente[cliente.id].isEmpty()}">
+                        <p><strong>Pedidos:</strong> <span th:text="${pedidosPorCliente[cliente.id].size()}"></span></p>
+                        <ul>
+                            <li th:each="pedido : ${pedidosPorCliente[cliente.id]}">
+                                Código: <strong th:text="${pedido.codigoPedido}"></strong>
+                            </li>
+                        </ul>
+                    </div>
+                    <div
+                        th:if="${pedidosPorCliente == null or !pedidosPorCliente.containsKey(cliente.id) or pedidosPorCliente[cliente.id] == null or pedidosPorCliente[cliente.id].isEmpty()}">
+                        <p style="color: gray;">⚠ Nenhum pedido associado</p>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div> <!-- Footer reaproveitado -->
+
+</body>
+
+</html>
